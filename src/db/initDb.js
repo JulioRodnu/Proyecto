@@ -12,6 +12,11 @@ const main = async () => {
     try {
         connection = await getDb();
 
+        console.log('borrando tablas...');
+        await connection.query('DROP TABLE IF EXISTS likes');
+        await connection.query('DROP TABLE IF EXISTS reseñas');
+        await connection.query('DROP TABLE IF EXISTS users');
+
         console.log('creando tablas...');
 
         await connection.query(`
