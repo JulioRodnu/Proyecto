@@ -10,13 +10,44 @@ const main = async () => {
     let connection;
 
     try {
-        let connection = await getDb();
+        connection = await getDb();
 
         console.log('creando tablas...');
 
-        await connection.query()
-    } catch (err) {
-        console.error(err);
+        await connection.query(`
+    CREATE TABLE IF NOT EXISTS users (
+        id INT UNSIGNED PRIMARY KEY AUTO_INCREMENT,
+        email VARCHAR(100) UNIQUE NOT NULL,
+        username VARCHAR(30) UNIQUE NOT NULL,
+        password VARCHAR(100) NOT NULL,
+        avatar VARCHAR(100),
+        role ENUM('admin', 'normal') DEFAULT 'normal',
+        createdAt DATETIME DEFAULT CURRENT_TIMESTAMP
+    )
+`);
+
+await connection.query(`
+    CREATE TABLE IF NOT EXISTS reseñas (
+        id INT UNSIGNED PRIMARY KEY AUTO_INCREMENT,
+        userId INT UNSIGNED NOT NULL,
+        text VARCHAR(1000) NOT NULL,
+        image VARCHAR(100),
+        createdAt DATETIME DEFAULT CURRENT_TIMESTAMP,
+        FOREIGN KEY(userId) REFERENCES users(id)
+    )
+`);
+
+await connection.query(`
+    CREATE TABLE IF NOT EXISTS likes (
+        id INT UNSIGNED PRIMARY KEY AUTO_INCREMENT,
+        userId INT UNSIGNED NOT NULL,
+        reseñaId INT UNSIGNED NOT NULL,
+        createdAt DATETIME DEFAULT CURRENT_TIMESTAMP,
+        FOREIGN KEY(userId) REFERENCES users(id),
+        FOREIGN KEY(reseñaId) REFERENCES reseñas(id) 
+    )
+`);
+
     } finally {
         //si existe conexion se libera 
         if (connection) connection.release();
