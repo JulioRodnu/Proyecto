@@ -1,6 +1,9 @@
 //import dependencias
 const mysql = require('mysql2/promise');
 
+//var de entorno mediante destructuring
+const { MYSQL_HOST, MYSQL_USER, MYSQL_PASS, MYSQL_DB} = process.env;
+
 //var almacenaje grupo conexiones
 let pool;
 
@@ -11,28 +14,29 @@ const getDb = async () => {
         if (!pool) {
             //creamos conexion con al sql server
             const connection = await mysql.createConnection({
-                host: 'localhost',
-                user: 'root',
-                password: 'qwerty123',
+                host: MYSQL_HOST,
+                user: MYSQL_USER,
+                password: MYSQL_PASS,
                 timezone: 'Z'
             })
 
             //creamos base de datos si no existe
-            await connection.query('CREATE DATABASE IF NOT EXIST tertulia');
+            await connection.query(`CREATE DATABASE IF NOT EXISTS ${MYSQL_DB}`);
 
             //creamos grupo de conexion
             pool = mysql.createPool({
                 connectionLimit: 10,
-                host: 'localhost',
-                user: 'root',
-                password: 'qwerty123',
-                database: 'tertulia',
+                host: MYSQL_HOST,
+                user: MYSQL_USER,
+                password: MYSQL_PASS,
+                database: MYSQL_DB,
                 timezone: 'Z'
             })
         }
+    
 
         //retornamos conexion libre con base de datos 
-        return await pool.getconnection();
+        return await pool.getConnection();
     } catch (err) {
         console.error(err);
     }
